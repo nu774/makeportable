@@ -1,16 +1,6 @@
 @echo off
 setlocal enabledelayedexpansion
 
-for /F "tokens=1,2*" %%i in ('reg query HKLM\Software\7-Zip /v Path') do (
-    set "PATH=%%k;%PATH%"
-)
-
-7z >NUL
-if not %errorlevel% == 0 (
-    echo 7z.exe is required
-    goto end
-)
-
 if not "%~1" == "" (
     set "installer=%~1"
 ) else if exist iTunes64Setup.exe (
@@ -22,8 +12,18 @@ if not "%~1" == "" (
     goto end
 )
 
-7z e -y "%installer%" iTunes.msi
-7z e -y "%installer%" iTunes64.msi
+tar xvf "%installer%" iTunes64.msi
+if %errorlevel% == 1 (
+    tar xvf "%installer%" iTunes.msi
+) else not %errorlevel% == 0 (
+    for /F "tokens=1,2*" %%i in ('reg query HKLM\Software\7-Zip /v Path') do (
+        set "PATH=%%k;%PATH%"
+    )
+    7z e -y "%installer%" iTunes64.msi
+    if %errorlevel% == 0 and not exist iTunes64.msi (
+        7z e -y "%installer%" iTunes.msi
+    )
+)
 
 if exist iTunes.msi (
     call :extract QTfiles iTunes.msi
