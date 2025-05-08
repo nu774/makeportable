@@ -15,13 +15,15 @@ if not "%~1" == "" (
 tar xvf "%installer%" iTunes64.msi
 if %errorlevel% == 1 (
     tar xvf "%installer%" iTunes.msi
-) else not %errorlevel% == 0 (
+) else if not %errorlevel% == 0 (
     for /F "tokens=1,2*" %%i in ('reg query HKLM\Software\7-Zip /v Path') do (
         set "PATH=%%k;%PATH%"
     )
     7z e -y "%installer%" iTunes64.msi
-    if %errorlevel% == 0 and not exist iTunes64.msi (
-        7z e -y "%installer%" iTunes.msi
+    if !errorlevel! == 0 (
+        if not exist iTunes64.msi (
+            7z e -y "%installer%" iTunes.msi
+        )
     )
 )
 
